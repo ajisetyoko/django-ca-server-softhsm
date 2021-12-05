@@ -10,7 +10,7 @@ services:
       - POSTGRES_PASSWORD=postgres
   
   api:
-    image: "webserver:latest"
+    image: "webserver:latest" # Change to .softhsm to enable hsm service
     build:
       context: .
       dockerfile: docker/Dockerfile.webserver

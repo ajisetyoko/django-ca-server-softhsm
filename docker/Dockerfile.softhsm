@@ -1,0 +1,55 @@
+FROM python:3.6-alpine
+
+## Source https://iami.xyz/Let_s_write_a_simple_encryption_services_with_softhsm2_and_flask/
+
+# SoftHSM Instalation
+ARG SOFTHSMV2_VERSION=2.6.1
+
+RUN apk add --no-cache \
+    libstdc++ \
+    libc6-compat \
+    libressl-dev \
+    autoconf \
+    automake \
+    build-base \
+    libtool \
+    openssl-dev \
+    opensc \
+    openssl \
+  && wget -O SoftHSMv2.tar.gz \
+    https://github.com/opendnssec/SoftHSMv2/archive/${SOFTHSMV2_VERSION}.tar.gz \
+  && tar -xf SoftHSMv2.tar.gz \
+  && cd SoftHSMv2-${SOFTHSMV2_VERSION} \
+  && ./autogen.sh \
+  && ./configure \
+  && make \
+  && make install
+
+RUN ln -s /lib/libc.musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2
+
+ENV SOFTHSM2_CONF=/home/softhsm/softhsm2.conf
+RUN adduser -u 10001 -D softhsm \
+  && mkdir /tokens \
+  && chown -R softhsm:softhsm /tokens
+
+## CREATE TOKEN for softhsm2
+COPY --chown=softhsm:softhsm softhsm2/softhsm2.conf /home/softhsm/softhsm2.conf
+
+COPY softhsm2/init_softhsm2.sh /init_softhsm2.sh
+RUN chmod a+x /init_softhsm2.sh
+RUN /init_softhsm2.sh
+
+## INSTALL WEBSERVER
+WORKDIR /
+# Copying requirements
+COPY ./api ./api
+RUN apk add --no-cache --virtual .build-deps \
+    ca-certificates gcc postgresql-dev linux-headers musl-dev \
+    libffi-dev jpeg-dev zlib-dev \
+    && pip install -r ./api/requirements.txt
+
+EXPOSE 8000
+WORKDIR /api/service
+
+RUN chmod +x starts.sh
+CMD ./starts.sh
