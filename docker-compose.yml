@@ -8,9 +8,20 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+    networks:
+      - dot-net
+    ports:
+      - "5432:5432"
   
   api:
     image: "webserver:latest" # Change to .softhsm to enable hsm service
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DB_HOST=postgres
     build:
       context: .
       dockerfile: docker/Dockerfile.webserver
@@ -18,3 +29,11 @@ services:
       - postgres
     ports:
       - 8000:8000
+    networks:
+      - dot-net
+
+networks:
+  dot-net:
+
+volumes:
+  db_data:

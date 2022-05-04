@@ -4,6 +4,15 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /
 # Copying requirements
 COPY ./api ./api
+
+# Updating the libraries and adding
+RUN apk --update  add \
+      postgresql-dev \
+      postgresql-client \
+      g++ libffi-dev openssl-dev make \
+      musl-dev python3-dev cargo libressl-dev \
+      && pip3 install --upgrade pip
+
 RUN apk add --no-cache --virtual .build-deps \
     ca-certificates gcc postgresql-dev linux-headers musl-dev \
     libffi-dev jpeg-dev zlib-dev \
@@ -15,4 +24,6 @@ WORKDIR /api/service
 # CMD gunicorn service.wsgi
 
 RUN chmod +x starts.sh
-CMD ./starts.sh
+RUN chmod +x wait-postgres.sh
+
+CMD sh ./wait-postgres.sh && sh ./starts.sh
