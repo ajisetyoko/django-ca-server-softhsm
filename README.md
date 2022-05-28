@@ -4,8 +4,7 @@ Minimal implementation of SoftHSM2 + Django + PostgreSQL
 Create minimal implementation:
 - [x] Django Minimal Apps
 - [x] SoftHSM2 Deployment
-- [ ] CA Key generation
-- [ ] Certificate Generation
+- [ ] Key generation
 - [ ] Message Signing
 - [ ] Message Verification
 - [ ] Test Case + CI
