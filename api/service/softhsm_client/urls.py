@@ -1,11 +1,16 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import KeyManagement, TestAuthentication
 
 app_name = "softhsm_client"
+
+router = DefaultRouter()
+router.register(r"key", KeyManagement, basename="key")
+
 urlpatterns = [
     path(
-        "key-management/dummy/",
-        view=KeyManagement.as_view(),
+        "",
+        include(router.urls),
         name="softhsm_client_hello",
     ),
     path(
