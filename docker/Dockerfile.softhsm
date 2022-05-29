@@ -6,18 +6,18 @@ FROM python:3.6-alpine
 ARG SOFTHSMV2_VERSION=2.6.1
 
 RUN apk add --no-cache \
-    libstdc++ \
-    libc6-compat \
-    libressl-dev \
-    autoconf \
-    automake \
-    build-base \
-    libtool \
-    openssl-dev \
-    opensc \
-    openssl \
+  libstdc++ \
+  libc6-compat \
+  libressl-dev \
+  autoconf \
+  automake \
+  build-base \
+  libtool \
+  openssl-dev \
+  opensc \
+  openssl \
   && wget -O SoftHSMv2.tar.gz \
-    https://github.com/opendnssec/SoftHSMv2/archive/${SOFTHSMV2_VERSION}.tar.gz \
+  https://github.com/opendnssec/SoftHSMv2/archive/${SOFTHSMV2_VERSION}.tar.gz \
   && tar -xf SoftHSMv2.tar.gz \
   && cd SoftHSMv2-${SOFTHSMV2_VERSION} \
   && ./autogen.sh \
@@ -43,13 +43,24 @@ RUN /init_softhsm2.sh
 WORKDIR /
 # Copying requirements
 COPY ./api ./api
+
+# Updating the libraries and adding
+RUN apk --update  add \
+  postgresql-client \
+  g++ make \
+  python3-dev cargo \
+  && pip3 install --upgrade pip
+
 RUN apk add --no-cache --virtual .build-deps \
-    ca-certificates gcc postgresql-dev linux-headers musl-dev \
-    libffi-dev jpeg-dev zlib-dev \
-    && pip install -r ./api/requirements.txt
+  ca-certificates gcc postgresql-dev linux-headers musl-dev \
+  libffi-dev jpeg-dev zlib-dev \
+  && pip install -r ./api/requirements.txt
 
 EXPOSE 8000
 WORKDIR /api/service
 
 RUN chmod +x starts.sh
-CMD ./starts.sh
+RUN chmod +x wait-postgres.sh
+
+CMD sh ./wait-postgres.sh && sh ./starts.sh
+# CMD ./starts.sh
