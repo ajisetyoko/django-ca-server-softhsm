@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import KeyManagement, TestAuthentication
+from .views import KeyManagement, Test, LoginView
+from knox import views as knox_views
 
 app_name = "softhsm_client"
 
@@ -15,7 +16,10 @@ urlpatterns = [
     ),
     path(
         "test-authentication/test",
-        view=TestAuthentication.as_view(),
+        view=Test.as_view(),
         name="test_authentication",
     ),
+    path(r"login/", LoginView.as_view(), name="knox_login"),
+    path(r"logout/", knox_views.LogoutView.as_view(), name="knox_logout"),
+    path(r"logoutall/", knox_views.LogoutAllView.as_view(), name="knox_logoutall"),
 ]

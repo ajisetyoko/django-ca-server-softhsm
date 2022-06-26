@@ -1,0 +1,17 @@
+FROM python:3.6-alpine
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /
+
+COPY ./api ./api
+RUN pip install pip --upgrade
+RUN apk add --no-cache --virtual .build-deps \
+    ca-certificates gcc postgresql-dev linux-headers musl-dev \
+    libffi-dev jpeg-dev zlib-dev \
+    && pip install -r ./api/requirements.txt
+
+EXPOSE 8000
+WORKDIR /api/service
+
+RUN chmod +x starts.sh
+CMD ./starts.sh

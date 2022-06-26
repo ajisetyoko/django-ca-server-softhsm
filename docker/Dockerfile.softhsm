@@ -32,18 +32,6 @@ RUN adduser -u 10001 -D softhsm \
   && mkdir /tokens \
   && chown -R softhsm:softhsm /tokens
 
-## CREATE TOKEN for softhsm2
-COPY --chown=softhsm:softhsm softhsm2/softhsm2.conf /home/softhsm/softhsm2.conf
-
-COPY softhsm2/init_softhsm2.sh /init_softhsm2.sh
-RUN chmod a+x /init_softhsm2.sh
-RUN /init_softhsm2.sh
-
-## INSTALL WEBSERVER
-WORKDIR /
-# Copying requirements
-COPY ./api ./api
-
 # Updating the libraries and adding
 RUN apk --update  add \
   postgresql-client \
@@ -51,10 +39,21 @@ RUN apk --update  add \
   python3-dev cargo \
   && pip3 install --upgrade pip
 
+WORKDIR /
+# Copying requirements
+COPY ./api ./api
+# INSTALL WEBSERVER
 RUN apk add --no-cache --virtual .build-deps \
   ca-certificates gcc postgresql-dev linux-headers musl-dev \
   libffi-dev jpeg-dev zlib-dev \
   && pip install -r ./api/requirements.txt
+
+## CREATE TOKEN for softhsm2
+COPY --chown=softhsm:softhsm softhsm2/softhsm2.conf /home/softhsm/softhsm2.conf
+
+COPY softhsm2/init_softhsm2.sh /init_softhsm2.sh
+RUN chmod a+x /init_softhsm2.sh
+RUN /init_softhsm2.sh
 
 EXPOSE 8000
 WORKDIR /api/service

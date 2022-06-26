@@ -22,11 +22,13 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=postgres
       - DB_HOST=postgres
-      - ENV_STATUS=PRODUCTION
-      - DEBUG=False
+      - ENV_STATUS=DEBUG
+      - DEBUG=True
+    volumes:
+      - ./api/service/softhsm_client:/api/service/softhsm_client
     build:
       context: .
-      dockerfile: docker/Dockerfile.softhsm # Change to .softhsm to enable hsm service
+      dockerfile: docker/Dockerfile.softhsm
     depends_on:
       - postgres
     ports:
